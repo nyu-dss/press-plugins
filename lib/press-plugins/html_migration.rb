@@ -263,7 +263,7 @@ Jekyll::Hooks.register :site, :post_read do |site|
     # Extracts people names from a string and creates their documents if
     # they don't exist.  Keeps the order in which they were found.
     to_people = lambda do |people_string|
-      string_sanitizer.call(people_string).sub(/,? (and|with) /, ',').split(',').map(&:strip).map do |person_name|
+      string_sanitizer.call(people_string).sub(/,? (and|with) /i, ',').split(',').map(&:strip).map do |person_name|
         people[person_name] ||= document_creator.call(person_name, 'person', nil, book)
         people[person_name].tap do |p|
           p.data['alternate-permalinks']  = as_set.call(p.data['alternate-permalinks']) << "#{book.data['permalink']}author/#{p.data['slug']}/"
