@@ -48,6 +48,8 @@ Jekyll::Hooks.register :site, :post_read do |site|
     exit 1
   end
 
+  FileUtils.mkdir_p(File.join(site.source, '_posts'))
+
   require 'securerandom'
   require 'nokogiri'
   require 'reverse_markdown'
