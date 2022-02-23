@@ -423,7 +423,7 @@ Jekyll::Hooks.register :site, :post_read do |site|
       document = section_to_document.call(essay_section, 'essay', 'essays').tap do |d|
         d.data['page'] = page
         # Essays are printed by default
-        d.data['availability'] ||= 'Print Essays'
+        d.data['availability'] ||= site.config['default_availability']
       end
 
       prune_data.call document
