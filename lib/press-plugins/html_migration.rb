@@ -461,7 +461,7 @@ Jekyll::Hooks.register :site, :post_read do |site|
             a.first <=> b.first
           end
 
-          if match.first > 0.9
+          if match && match.first > 0.9
             person = match.last
 
             Jekyll.logger.warn "Found similar name for #{name}: #{person.data['title']}"
