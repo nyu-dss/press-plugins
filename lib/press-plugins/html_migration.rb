@@ -213,7 +213,7 @@ Jekyll::Hooks.register :site, :post_read do |site|
 
     html = Nokogiri::HTML File.read(index)
     # Find the publishing year
-    year   = html.css('#cip').first&.text&.match(/© (?<year>\d{4})/)&.to_a&.last
+    year   = html.css('#cip,#copyright').first&.text&.match(/© (?<year>\d{4})/)&.to_a&.last
     year ||= Time.now.year
     years[year] ||= [nil]
     years[year]  << book_slug
