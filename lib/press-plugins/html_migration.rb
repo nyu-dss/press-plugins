@@ -435,16 +435,17 @@ Jekyll::Hooks.register :site, :post_read do |site|
     # depends on the book, there's no progression on the format.
     contributors   = html.css('#ab_contrib').first
     contributors ||= html.css('#contrib').first
+    contributors ||= html.css('#contributors').first
 
     if contributors
       # XXX: Author bio has inconsistent naming.
-      contributors.css('.aubio,.aubiof,.aubioft').each do |author|
+      contributors.css('.aubio,.aubiof,.aubioft,p').each do |author|
         author_name = author.css('.aubion').first
         author_name&.name = 'strong'
         name = author_name&.text&.split(',', 2)&.first
         # Fallback.  Different ways in which author names can be split
         # from the text.
-        name ||= author.text.split(/(( (is|holds|has)|,|’s) |—Research| \(@)/, 2).first
+        name ||= author.text.split(/(( (is|holds|has|received)|,|’s) |—Research| \(@)/, 2).first
         name   = string_sanitizer.call(name)
         name.sub!(/dr\. /i, '')
 
