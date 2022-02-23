@@ -138,19 +138,19 @@ Jekyll::Hooks.register :site, :post_read do |site|
     {
       title: 'Introduction',
       field: 'introduction',
-      id: 'intro',
+      id: %w[intro introduction],
       layout: 'page',
       editors: true
     },
     {
       title: 'Acknowledgments',
       field: 'acknowledgments',
-      id: 'acknow',
+      id: %w[acknow acknowledgments],
       layout: 'page'
     },
     {
       title: 'Appendix',
-      id: 'app',
+      id: %w[app appendix],
       layout: 'page'
     }
   ]
@@ -321,7 +321,11 @@ Jekyll::Hooks.register :site, :post_read do |site|
 
     # Pages
     book_layout.each do |layout|
-      if (section = html.css("section[id=\"#{layout[:id]}\"]").first)
+      layout_ids = layout[:id].map do |id|
+        "section[id=\"#{id}\"]"
+      end.join(',')
+
+      if (section = html.css(layout_ids).first)
         document = section_to_document.call section, 'page', layout[:field], layout[:editors]
         prune_data.call document
         document.save
