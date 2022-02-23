@@ -303,8 +303,18 @@ Jekyll::Hooks.register :site, :post_read do |site|
 
     # Process an HTML section and create its document.
     section_to_document = lambda do |section, layout, book_field = nil, editors = false|
+      section_people = section.css('p.au,h1 + p small')
+      section_people.remove
+
+      section.css('h1').map do |h1|
+        h1.remove if /\A\d+\z/ =~ h1.text
+      end
+
       title = section.css('h1:first-child')
-      title.remove
+      title&.remove
+
+      subtitle = section.css('h1:first-child')
+      subtitle&.remove
 
       document_creator.call(title.text, layout, nil, book).tap do |d|
         # TODO: Get from schema, when we decide on CMS
@@ -314,8 +324,7 @@ Jekyll::Hooks.register :site, :post_read do |site|
         else book.data[book_field] = d
         end if book_field
 
-        section_people = section.css('p.au')
-        section_people.remove
+        d.data['subtitle'] = subtitle.text if subtitle
 
         d.data['authors'] = to_people.call(section_people.text).map do |p|
           p.data['books']  = as_set.call(p.data['books']) << book
