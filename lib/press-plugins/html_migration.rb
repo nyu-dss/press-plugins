@@ -413,7 +413,7 @@ Jekyll::Hooks.register :site, :post_read do |site|
     end
 
     # Essays.  They're identified by a section with a chapter number.
-    html.css('section:has(.cn)').each do |essay_section|
+    html.css('section:has(.cn),section[id^="ch"]').each do |essay_section|
       # Chapters start on odd pages
       page = essay_section.css('.page').first['id'].sub('p', '').to_i
       page = page + 1 if page % 2 == 0
