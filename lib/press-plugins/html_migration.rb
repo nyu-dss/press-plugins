@@ -136,6 +136,18 @@ Jekyll::Hooks.register :site, :post_read do |site|
 
   book_layout = [
     {
+      title: 'Preface',
+      field: 'preface',
+      id: %w[preface],
+      layout: 'page'
+    },
+    {
+      title: 'Foreword',
+      field: 'foreword',
+      id: %w[foreword],
+      layout: 'page'
+    },
+    {
       title: 'Introduction',
       field: 'introduction',
       id: %w[intro introduction],
