@@ -373,7 +373,10 @@ Jekyll::Hooks.register :site, :post_read do |site|
       # Keep size so we can store order.
       total_refs = 0
 
-      works_cited.css('.rf,.rff').tap do |r|
+      references = works_cited.css('.rf,.rff')
+      references = works_cited.css('p') if references.empty?
+
+      references.tap do |r|
         total_refs = r.size
       end.each_with_index do |ref, i|
         work_cited_title = string_sanitizer.call ref.text
@@ -445,7 +448,7 @@ Jekyll::Hooks.register :site, :post_read do |site|
         name = author_name&.text&.split(',', 2)&.first
         # Fallback.  Different ways in which author names can be split
         # from the text.
-        name ||= author.text.split(/(( (is|holds|has|received)|,|’s) |—Research| \(@)/, 2).first
+        name ||= author.text.split(/(( (is|holds|has|works|received)|,|’s) |—Research| \(@)/, 2).first
         name   = string_sanitizer.call(name)
         name.sub!(/dr\. /i, '')
 
@@ -497,7 +500,7 @@ Jekyll::Hooks.register :site, :post_read do |site|
         a.data['uuid'] = SecureRandom.uuid
         a.data['book'] = book
         a.data['authors'] = book.data['editors']
-        a.data['authors'].each do |au|
+        a.data['authors']&.each do |au|
           au.data['posts'] = as_set.call(au.data['posts']) << a
         end
 
