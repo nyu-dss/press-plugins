@@ -468,7 +468,10 @@ Jekyll::Hooks.register :site, :post_read do |site|
             person = match.last
             title = person.data['title']
 
-            person.data['title'] = name if title.upcase == title
+            if title.upcase == title
+              person.data['title'] = name
+              people[name] = person
+            end
 
             Jekyll.logger.warn "Found similar name for #{name}: #{person.data['title']}"
           end
