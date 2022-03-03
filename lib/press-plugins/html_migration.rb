@@ -498,45 +498,41 @@ Jekyll::Hooks.register :site, :post_read do |site|
     end
 
     # Create an about page
-    unless book.data['about']
-      book.data['about'] = about = document_creator.call('About this Site', 'page', 'about-this-site', book).tap do |a|
-        a.data['uuid'] = SecureRandom.uuid
-        a.data['book'] = book
-        a.data['authors'] = book.data['editors']
-        a.data['authors']&.each do |au|
-          au.data['posts'] = as_set.call(au.data['posts']) << a
-        end
-
-        a.content = book_content
+    book.data['about'] = about = document_creator.call('About this Site', 'page', 'about-this-site', book).tap do |a|
+      a.data['uuid'] = SecureRandom.uuid
+      a.data['book'] = book
+      a.data['authors'] = book.data['editors']
+      a.data['authors']&.each do |au|
+        au.data['posts'] = as_set.call(au.data['posts']) << a
       end
 
-      Jekyll.logger.warn "Created about page at #{about.relative_path}"
-
-      prune_data.call about
-      about.save
+      a.content = book_content
     end
+
+    Jekyll.logger.warn "Created about page at #{about.relative_path}"
+
+    prune_data.call about
+    about.save
 
     # Create a rights page
-    unless book.data['rights']
-      book.data['rights'] = rights = document_creator.call('Rights', 'page', 'rights-page', book).tap do |r|
-        r.data['uuid'] = SecureRandom.uuid
-        r.data['book'] = book
-        r.content = <<~CONTENT
-          _Keywords for #{book.data['title']}_ is © #{year} by New York
-          University. Material on this website is licensed under a
-          [Creative Commons Attribution-NonCommercial-NoDerivatives 4.0
-          International
-        License](http://creativecommons.org/licenses/by-nc-nd/4.0/).
+    book.data['rights'] = rights = document_creator.call('Rights', 'page', 'rights-page', book).tap do |r|
+      r.data['uuid'] = SecureRandom.uuid
+      r.data['book'] = book
+      r.content = <<~CONTENT
+        _Keywords for #{book.data['title']}_ is © #{year} by New York
+        University. Material on this website is licensed under a
+        [Creative Commons Attribution-NonCommercial-NoDerivatives 4.0
+        International
+      License](http://creativecommons.org/licenses/by-nc-nd/4.0/).
 
-          [![Creative Commons License](https://licensebuttons.net/l/by-nc-nd/4.0/88x31.png)](http://creativecommons.org/licenses/by-nc-nd/4.0/)
-        CONTENT
-      end
-
-      Jekyll.logger.warn "Created rights page at #{rights.relative_path}"
-
-      prune_data.call rights
-      rights.save
+        [![Creative Commons License](https://licensebuttons.net/l/by-nc-nd/4.0/88x31.png)](http://creativecommons.org/licenses/by-nc-nd/4.0/)
+      CONTENT
     end
+
+    Jekyll.logger.warn "Created rights page at #{rights.relative_path}"
+
+    prune_data.call rights
+    rights.save
 
     prune_data.call book
     book.save
