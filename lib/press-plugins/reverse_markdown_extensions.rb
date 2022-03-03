@@ -27,9 +27,9 @@ module ReverseMarkdown
           # If it's the first link on the parent, it's the footnote
           # itself, otherwise it's the reference.
           if first_child == node || first_child.children.include?(node)
-            "^[#{node['href'].tr('#', '')}]:"
+            "[^#{node['href'].tr('#', '')}]:"
           else
-            "^[#{node['id']}]"
+            "[^#{node['id']}]"
           end
         # Just process the link.
         else
