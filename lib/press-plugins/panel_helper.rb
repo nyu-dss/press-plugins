@@ -20,7 +20,7 @@ Jekyll::Hooks.register :site, :post_read, priority: :low do |site|
       url: doc.url
     }
 
-    panel[:posts][doc.relative_path] = doc.data['book'].relative_path if doc.data['book']
+    panel[:posts][doc.relative_path][:book] = doc.data['book'].relative_path if doc.data['book']
 
     panel[:layouts][doc.data['layout']] ||= []
     panel[:layouts][doc.data['layout']]  << doc.relative_path
