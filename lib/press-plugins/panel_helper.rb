@@ -3,6 +3,8 @@
 # Generate an index for the panel.  This file will be downloaded
 # directly from Github's repositories and is for internal use only.
 Jekyll::Hooks.register :site, :post_read, priority: :low do |site|
+  next unless ENV['JEKYLL_ENV'] == 'panel-helper'
+
   panel = {
     posts: {},
     layouts: {}
@@ -32,4 +34,6 @@ Jekyll::Hooks.register :site, :post_read, priority: :low do |site|
 
     f.write panel.to_json
   end
+
+  exit
 end
