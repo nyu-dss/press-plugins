@@ -37,6 +37,13 @@
 Jekyll::Hooks.register :site, :post_read do |site|
   next unless ENV['JEKYLL_ENV'] == 'html-migration'
 
+  require 'anystyle'
+
+  # Don't perform name normalization, we want names as found
+  AnyStyle.parser.normalizers.reject! do |normalizer|
+    normalizer.class == AnyStyle::Normalizer::Names
+  end
+
   require 'jekyll-write-and-commit-changes'
   require 'sutty_migration/jekyll/document_creator'
 
@@ -59,20 +66,6 @@ Jekyll::Hooks.register :site, :post_read do |site|
   JUNIOR_RE = /j(unio)?r\.?/i
   # Lastnames come after the last initial
   INITIALS_RE = /(?<firstnames>.*\.) (?<lastnames>.*)/
-  # Process citations
-  # slug: authors + year
-  # authorship: anything non-numeric up to editors or year
-  # editors: ed. or eds. also dir.
-  # year: possible formats are:
-  #   2000
-  #   2000a
-  #   2000-01 (and combinations of above)
-  #   (2000) 2001 (and combinations of above)
-  #   (2000, 2001) 2002 (and combinations of above)
-  #   n.d
-  #   n.d.-a
-  #   forthcoming
-  WORK_CITED_RE = /(?<slug>(?<authorship>[^0-9]+)(,? (eds?|dir))?[\.:]”?((,? ?\(?\d{4}([\-–0-9a-z]+)?\)?)+\.| ?n\.d\.(-[a-z]\.)?| ?forthcoming\.))/i
   SE_RE = /\.SE[0-9.]*/
   PUNCT_RE = /\s+(?<punct>[,\.:)!?])/
   DASHES_RE = /\A[-_—-]+([,.])/
@@ -385,16 +378,27 @@ Jekyll::Hooks.register :site, :post_read do |site|
           work_cited_title.sub!(DASHES_RE, "#{previous_authorship}\\1")
         end
 
-        # Find authorship for citation format Authors. Year.
-        _, slug, authorship = work_cited_title.match(WORK_CITED_RE).to_a
-        # Remove extra editor role
-        authorship&.sub! /,? eds?/, ''
-        slug = Jekyll::Utils.slugify(slug, mode: 'latin')
+        # Use AnyStyle to parse work cited
+        parsed_work_cited = AnyStyle.parse(work_cited_title).first
+        # Use author, editor or publisher
+        parsed_authors = parsed_work_cited[:author] || parsed_work_cited[:editor] || parsed_work_cited[:publisher]
 
-        if slug.nil? || slug == work_cited_title
-          Jekyll.logger.warn "Couldn't process work cited: #{work_cited_title}"
-          next
+        slug = parsed_authors&.join(',') || parsed_work_cited[:title]&.first
+        authorship = parsed_authors&.join(', and ') || slug
+
+        Jekyll.logger.warn 'Work cited:', "Couldn't find authorship: #{work_cited_title}" if authorship.blank?
+
+        # Shorten slug to 100 characters
+        slug = Jekyll::Utils.slugify(slug, mode: 'latin')[0..99]
+
+        # Add date later
+        unless (date = parsed_work_cited[:date]&.first).blank?
+          slug << '-'
+          slug << Jekyll::Utils.slugify(date, mode: 'latin')[0..99]
         end
+
+        # Remove extra dots and dashes
+        slug = slug.tr('.', '-').squeeze('-')
 
         work_cited = document_creator.call(work_cited_title, 'work_cited', slug, book).tap do |wc|
           wc.data['order'] = total_refs - i
@@ -404,7 +408,11 @@ Jekyll::Hooks.register :site, :post_read do |site|
           book.data['works_cited'] = as_set.call(book.data['works_cited']) << wc
 
           # Recover author and bold it
-          wc.content = to_markdown.call(ref.inner_html.to_s).sub(DASHES_RE, "#{authorship}\\1").sub(/\A#{authorship}/, "**#{authorship}**")
+          wc.content = to_markdown.call(ref.inner_html.to_s).sub(DASHES_RE, "#{authorship}\\1").tap do |cite|
+            parsed_authors&.each do |author|
+              cite.sub!(author, "**#{author}**")
+            end
+          end
         end
 
         prune_data.call work_cited

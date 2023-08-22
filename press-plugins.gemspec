@@ -40,4 +40,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'sutty-migration', '~> 0.3.3'
   spec.add_dependency 'php-serialize'
   spec.add_dependency 'wordpress-formatting'
+  spec.add_dependency 'anystyle'
 end
