@@ -68,7 +68,7 @@ Jekyll::Hooks.register :site, :post_read do |site|
   INITIALS_RE = /(?<firstnames>.*\.) (?<lastnames>.*)/
   SE_RE = /\.SE[0-9.]*/
   PUNCT_RE = /\s+(?<punct>[,\.:)!?])/
-  DASHES_RE = /\A[-_—-]+([,.])/
+  DASHES_RE = /\A[-_—-]+[,.]/
   REMOVE_EDITORS_RE = /<h2[^>]*>\s*edited[^<]+<\/h2>/i
   READ_MORE_RE = /<a[^>]+>read[^<]+<\/a>/i
   LINKIFY_RE = %r{(?<url>https?://[^ ]+)}
@@ -375,7 +375,7 @@ Jekyll::Hooks.register :site, :post_read do |site|
         work_cited_title = string_sanitizer.call ref.text
 
         if work_cited_title.start_with?(DASHES_RE) && previous_authorship
-          work_cited_title.sub!(DASHES_RE, "#{previous_authorship}\\1")
+          work_cited_title.sub!(DASHES_RE, previous_authorship)
         end
 
         # Use AnyStyle to parse work cited
@@ -408,7 +408,7 @@ Jekyll::Hooks.register :site, :post_read do |site|
           book.data['works_cited'] = as_set.call(book.data['works_cited']) << wc
 
           # Recover author and bold it
-          wc.content = to_markdown.call(ref.inner_html.to_s).sub(DASHES_RE, "#{authorship}\\1").tap do |cite|
+          wc.content = to_markdown.call(ref.inner_html.to_s).sub(DASHES_RE, authorship).tap do |cite|
             parsed_authors&.each do |author|
               cite.sub!(author, "**#{author}**")
             end
