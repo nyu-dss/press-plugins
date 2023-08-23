@@ -362,6 +362,7 @@ Jekyll::Hooks.register :site, :post_read do |site|
     works_cited ||= html.css('#wrk_ctd').first
 
     if works_cited
+      works_cited_registry = {}
       previous_authorship = nil
       # Keep size so we can store order.
       total_refs = 0
@@ -371,6 +372,8 @@ Jekyll::Hooks.register :site, :post_read do |site|
 
       references.tap do |r|
         total_refs = r.size
+
+        Jekyll.logger.info 'Works cited:', "Importing #{total_refs} references"
       end.each_with_index do |ref, i|
         work_cited_title = string_sanitizer.call ref.text
 
@@ -399,8 +402,13 @@ Jekyll::Hooks.register :site, :post_read do |site|
 
         # Remove extra dots and dashes
         slug = slug.tr('.', '-').squeeze('-')
+        if works_cited_registry[slug]
+          Jekyll.logger.warn 'Works Cited:', "Duplicate slug #{slug}"
+          slug = "#{slug}-#{i}"
+        end
 
         work_cited = document_creator.call(work_cited_title, 'work_cited', slug, book).tap do |wc|
+          works_cited_registry[slug] = wc
           wc.data['order'] = total_refs - i
           wc.data['authorship'] = authorship
           wc.data['book'] = book
