@@ -73,7 +73,6 @@ Jekyll::Hooks.register :site, :post_read do |site|
   READ_MORE_RE = /<a[^>]+>read[^<]+<\/a>/i
   LINKIFY_RE = %r{(?<url>https?://[^ ]+)}
   UNESCAPE_LINKS_RE = %r{<https?://[^>]+>}
-  AUTHORSHIP_RE = %r{<(?<tag>strong|i|em|b)>(?<authorship>[^<]+)</\k<tag>>}
   NEWLINE_AFTER_TAG_RE = /(?<tag><[^>]+>)\n+/
   # Don't allow html tags with space or punctuation marks.
   EMPTY_HTML_RE = %r{<([^>]+)>([\s[:punct:]]*)</\1>}
