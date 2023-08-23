@@ -69,6 +69,7 @@ Jekyll::Hooks.register :site, :post_read do |site|
   SE_RE = /\.SE[0-9.]*/
   PUNCT_RE = /\s+(?<punct>[,\.:)!?])/
   DASHES_RE = /\A[-_—-]+[,.]/
+  SV_RE = /,? s\.v\./
   REMOVE_EDITORS_RE = /<h2[^>]*>\s*edited[^<]+<\/h2>/i
   READ_MORE_RE = /<a[^>]+>read[^<]+<\/a>/i
   LINKIFY_RE = %r{(?<url>https?://[^ ]+)}
@@ -382,8 +383,8 @@ Jekyll::Hooks.register :site, :post_read do |site|
         # Use author, editor or publisher
         parsed_authors = parsed_work_cited[:author] || parsed_work_cited[:editor] || parsed_work_cited[:publisher]
 
-        slug = parsed_authors&.join(',') || parsed_work_cited[:title]&.first
-        authorship = parsed_authors&.join(', and ') || slug
+        slug = parsed_authors&.join(',')&.sub(SV_RE, '') || parsed_work_cited[:title]&.first
+        authorship = parsed_authors&.join(', and ')&.sub(SV_RE, '') || slug
 
         Jekyll.logger.warn 'Work cited:', "Couldn't find authorship: #{work_cited_title}" if authorship.blank?
 
